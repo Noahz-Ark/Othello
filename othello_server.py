@@ -1,19 +1,21 @@
-import numpy as np
 import random
-import time
 import sys
 import socket
 import threading
 
+
 # macro
-from variable import * # NONE, WHITE, BLACK, SENTINEL, NONE_STONE, WHITE_STONE, BLACK_STONE, DIRECTIONS, CELLS
-from method import * # int2tuple, tuple2int, decode_result, encode_result
+from variable import *
+from method import *
+
 
 # global method
 from board import is_valid_move, valid_moves, count_color, the_end, print_board
 
+
 # class
 from board import Board
+
 
 # global variable
 B = None
@@ -33,10 +35,8 @@ REF = True
 PLY1 = False
 PLY2 = False
 
-#TODO: ENVを環境として必要なglobal変数を格納する
 START = True
 END = False
-ENV = []
 
 
 # referee
@@ -153,8 +153,6 @@ def server1():
         if message:
             M = int2tuple(int(message))
             REF = True
-        # else:
-        #     pass
 
 
 # player2
@@ -177,17 +175,14 @@ def server2():
         if message:
             M = int2tuple(int(message))
             REF = True
-        # else:
-        #     pass
 
 
 def initialize():
     global B, C, M
+    global HOST, PORT, SERVER
     B = Board()
     C = B.color
     M = (0, 0)
-
-    global HOST, PORT, SERVER
     HOST = "localhost"
     PORT = int(sys.argv[1])
     SERVER = socket.socket()

@@ -1,27 +1,28 @@
-import numpy as np
 import random
-import time
 import sys
 import socket
-import threading
+
 
 # macro
-from variable import NONE, WHITE, BLACK, SENTINEL, NONE_STONE, WHITE_STONE, BLACK_STONE, DIRECTIONS, CELLS
-from method import int2tuple, tuple2int, decode_result, encode_result
+from variable import *
+from method import *
+
 
 # global method
 from board import is_valid_move, valid_moves, count_color, the_end, print_board
 
+
 # class
 from board import Board
+
 
 # global variable
 B = None
 C = None
 M = None
 
-HOST = "localhost"
-PORT = int(sys.argv[1])
+HOST = None
+PORT = None
 CLIENT = None
 
 REFEREE = None
@@ -31,13 +32,11 @@ REF = True
 PLY1 = False
 PLY2 = False
 
-#TODO: ENVを環境として必要なglobal変数を格納する
 START = True
 END = False
-ENV = []
 
 
-def client():
+def client(): 
     global START, END
     global REF, PLY1, PLY2
     global B, C, M
@@ -51,13 +50,16 @@ def client():
 
         if message < 0:
             break
-        # 1手目
+        # first
         elif message == 0:
-            mystone = B.random_choice()
+            print_board(B.board, B.color, B.mycolor)
+            # TODO: change here
+            mystone = B.decide()
+            ####################
             B.move(mystone)
             message = str(tuple2int(mystone))
             CLIENT.send(message.encode("UTF-8"))
-        # 2手目以降
+        # not first
         elif message < 100:
             opstone = int2tuple(message)
             B.move(opstone)
@@ -66,11 +68,13 @@ def client():
             if the_end(B.board, B.color):
                 pass
             else:
-                mystone = B.random_choice()
+                # TODO: change here
+                mystone = B.decide()
+                ####################
                 B.move(mystone)
                 message = str(tuple2int(mystone))
                 CLIENT.send(message.encode("UTF-8"))
-        # 勝利
+        # win
         elif message < 10000:
             (_, b, w) = decode_result(message)
             print("Win!\n")
@@ -78,7 +82,7 @@ def client():
             print_board(B.board, B.color, B.mycolor)
             CLIENT.close()
             break
-        # 敗北
+        # lose
         elif message < 20000:
             (_, b, w) = decode_result(message)
             print("Lose!\n")
@@ -86,7 +90,7 @@ def client():
             print_board(B.board, B.color, B.mycolor)
             CLIENT.close()
             break
-        # 引き分け
+        # draw
         elif message < 30000:
             (_, b, w) = decode_result(message)
             print("Draw!\n")
@@ -102,13 +106,12 @@ def client():
 
 def initialize():
     global B, C, M
+    global HOST, PORT, CLIENT
     B = Board()
     C = B.color
     M = (0, 0)
-
-    global HOST, PORT, CLIENT
-    HOST = "localhost"
-    PORT = int(sys.argv[1])
+    HOST = sys.argv[1]
+    PORT = int(sys.argv[2])
     CLIENT = socket.socket()
 
 
