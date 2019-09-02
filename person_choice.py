@@ -54,7 +54,7 @@ def client():
         elif message == 0:
             print_board(B.board, B.color, B.mycolor)
             # TODO: change here
-            mystone = B.decide()
+            mystone = B.person_choice()
             ####################
             B.move(mystone)
             message = str(tuple2int(mystone))
@@ -69,7 +69,7 @@ def client():
                 pass
             else:
                 # TODO: change here
-                mystone = B.decide()
+                mystone = B.person_choice()
                 ####################
                 B.move(mystone)
                 message = str(tuple2int(mystone))

@@ -86,6 +86,9 @@ def server0():
                 PLAYER_COLOR["white"].send(message.encode("UTF-8"))
             break
         else:
+            # FIXME: valid_colorでPASSに対応できるようにする
+            # FIXME: 送信するメッセージの体裁を変更する
+            # FIXME: 2playersに送信するが、最上位の0/1で自分の番かどうか決める
             if the_end(B.board, B.color):
                 END = True
                 continue
@@ -94,7 +97,6 @@ def server0():
             if PLY1:
                 print_board(B.board, B.color, B.mycolor)
                 if is_valid_move(B.board, B.color, M):
-                    print("OK")
                     B.move(M)
                     REF = False
                     PLY1 = False
@@ -102,7 +104,6 @@ def server0():
                     message = str(tuple2int(M))
                     PLAYER2.send(message.encode("UTF-8"))
                 else:
-                    print("NG")
                     b, w = (count_color(B.board, BLACK), count_color(B.board, WHITE))
                     message = str(encode_result((0, b, w)))
                     PLAYER2.send(message.encode("UTF-8"))
@@ -110,10 +111,8 @@ def server0():
                     PLAYER1.send(message.encode("UTF-8"))
                     break
             elif PLY2:
-                print(M)
                 print_board(B.board, B.color, B.mycolor)
                 if is_valid_move(B.board, B.color, M):
-                    print("OK")
                     B.move(M)
                     REF = False
                     PLY2 = False
@@ -121,7 +120,6 @@ def server0():
                     message = str(tuple2int(M))
                     PLAYER1.send(message.encode("UTF-8"))
                 else:
-                    print("NG")
                     b, w = (count_color(B.board, BLACK), count_color(B.board, WHITE))
                     message = str(encode_result((0, b, w)))
                     PLAYER1.send(message.encode("UTF-8"))
