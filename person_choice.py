@@ -47,32 +47,51 @@ def client():
     while True:
         message = ""
         message = int(CLIENT.recv(1024).decode("UTF-8"))
+        print(message)
 
         if message < 0:
             break
-        # first
+            
+        # first (not my turn)
         elif message == 0:
+            print_board(B.board, B.color, B.mycolor)
+            message = str(message)
+            CLIENT.send(message.encode("UTF-8"))
+
+        elif message == 1:
             print_board(B.board, B.color, B.mycolor)
             # TODO: change here
             mystone = B.person_choice()
             ####################
             B.move(mystone)
-            message = str(tuple2int(mystone))
+            message = str(tuple2int(mystone) + 100)
+            M = tuple2int(mystone)
             CLIENT.send(message.encode("UTF-8"))
-        # not first
+
+        # not first (not my turn)
         elif message < 100:
+            if M != message:
+                opstone = int2tuple(message)
+                B.move(opstone)
+            print_board(B.board, B.color, B.mycolor)
+            if not the_end(B.board, B.color):
+                message = str(message)
+                CLIENT.send(message.encode("UTF-8"))
+
+        # not first (my turn)
+        elif message < 200:
+            message = message % 100
             opstone = int2tuple(message)
             B.move(opstone)
             print_board(B.board, B.color, B.mycolor)
 
-            if the_end(B.board, B.color):
-                pass
-            else:
+            if not the_end(B.board, B.color):
                 # TODO: change here
                 mystone = B.person_choice()
                 ####################
                 B.move(mystone)
-                message = str(tuple2int(mystone))
+                message = str(tuple2int(mystone) + 100)
+                M = tuple2int(mystone)
                 CLIENT.send(message.encode("UTF-8"))
         # win
         elif message < 10000:
@@ -109,7 +128,7 @@ def initialize():
     global HOST, PORT, CLIENT
     B = Board()
     C = B.color
-    M = (0, 0)
+    M = 0
     HOST = sys.argv[1]
     PORT = int(sys.argv[2])
     CLIENT = socket.socket()
