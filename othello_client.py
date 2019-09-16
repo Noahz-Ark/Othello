@@ -46,8 +46,12 @@ def client():
 
     while True:
         message = ""
-        message = int(CLIENT.recv(1024).decode("UTF-8"))
-        print(message)
+        message = CLIENT.recv(1024).decode("UTF-8")
+        print("server1", message)
+        if message == "":
+            print("Connection disconnected...")
+        # end if
+        message = int(message)
 
         if message < 0:
             break

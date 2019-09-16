@@ -17,6 +17,23 @@
         - 手を打ったplayerには100を加えて返す
         - 手を打たれたplayerにはそのまま送信する
     - 仕事が終わったらserver1/2が動けるようにグローバル変数の値を更新する
+- 複数回対戦を実現するためにはmain関数内でwhileループを回して、初期化->スレッド建設->スレッド削除->後処理を繰り返す
+    - serverに関する設定の読み込みは一度だけ行えば良い
+    - clientに関する設定があればそれは通信が開始される際に行えば良い
+
+## Server内のglobal変数
+- B, C, M
+    - boardの状態や(送信されてきた)手を格納する
+- HOST, PORT, SERVER
+    - host名、port番号、通信に使うソケットを定義する(基本的に1回しか設定しない)
+- REFEREE, PLAYER1, PLAYER2
+    - 通信に使うソケットを定義する(REFEREEは使ってない)
+- COLOR_OF_PLAYER, PLAYER_OF_COLOR
+    - playerとcolorを対応づける
+- REF, PLY1, PLY2
+    - server0-2が動作するためのスイッチの役割をする
+- START, END
+    - 対戦が開始・終了したことを示すフラグである(複数対戦になったらより多くの変数が必要になりそう)
 
 ## CLientの仕様
 - python othello_client.py <ホスト名> <ポート番号> でServerが立っているポートなどを指定することで対戦できる
