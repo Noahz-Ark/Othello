@@ -47,8 +47,10 @@ def server0():
     global B, C, M
     global PLAYER1, PLAYER2, PLAYER_COLOR
 
+    # while True:
     while (PLAYER1 is None) or (PLAYER2 is None):
         pass
+    # end while
     while True:
         if START:
             r = random.choice([True, False])
@@ -74,48 +76,65 @@ def server0():
                 COLOR_OF_PLAYER["player1"] = WHITE
                 PLAYER1.send("0".encode("UTF-8"))
                 PLAYER2.send("1".encode("UTF-8"))
+            # end else
             print_board(B.board, B.color, B.mycolor)
         elif END:
             b, w = (count_color(B.board, BLACK), count_color(B.board, WHITE))
             if b > w:
-                message = str(encode_result((0, b, w)))
-                PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
+                # message = ""
                 message = str(encode_result((1, b, w)))
+                PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
+                # message = ""
+                message = str(encode_result((2, b, w)))
                 PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
             elif b < w:
-                message = str(encode_result((1, b, w)))
+                # message = ""
+                message = str(encode_result((2, b, w)))
                 PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
-                message = str(encode_result((0, b, w)))
+                # message = ""
+                message = str(encode_result((1, b, w)))
                 PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
             else:
-                message = str(encode_result((2, b, w)))
+                # message = ""
+                message = str(encode_result((3, b, w)))
                 PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
-                message = str(encode_result((2, b, w)))
+                # message = ""
+                message = str(encode_result((3, b, w)))
                 PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+            # end else
             break
         else:
-            if the_end(B.board, B.color):
-                END = True
-                continue
+            # if the_end(B.board, B.color):
+            #     END = True
+            #     continue
             if PLY1 or PLY2:
                 continue
-
+            # end if
             if is_valid_move(B.board, B.color, M):
                 B.move(M)
                 print_board(B.board, B.color, B.mycolor)
-                if B.color == BLACK:
-                    message = str(tuple2int(M) + 100)
-                    PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
+                if the_end(B.board, B.color):
                     message = str(tuple2int(M))
-                    PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
-                if B.color == WHITE:
-                    message = str(tuple2int(M))
-                    PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
-                    message = str(tuple2int(M) + 100)
-                    PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+                    PLAYER1.send(message.encode("UTF-8"))
+                    PLAYER2.send(message.encode("UTF-8"))
+                    END = True
+                else:
+                    if B.color == BLACK:
+                        message = str(tuple2int(M) + 100)
+                        PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
+                        message = str(tuple2int(M))
+                        PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+                    # end if
+                    if B.color == WHITE:
+                        message = str(tuple2int(M))
+                        PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
+                        message = str(tuple2int(M) + 100)
+                        PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+                    # end if
                 REF = False
                 PLY1 = True
                 PLY2 = True
+                # end if
             else:
                 b, w = (count_color(B.board, BLACK), count_color(B.board, WHITE))
                 message = str(encode_result((0, b, w)))
@@ -123,6 +142,11 @@ def server0():
                 message = str(encode_result((1, b, w)))
                 PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
                 break
+                # end if
+            # end if
+        # end while
+    # end while
+# end def   
 
 
 # player1
@@ -143,6 +167,9 @@ def server1():
         message = ""
         message = PLAYER1.recv(1024).decode("UTF-8")
         print("server1", message)
+        if message == "":
+            print("Connection disconnected...")
+            break
         message = int(message)
         if message > 100:
             M = int2tuple(message - 100)
@@ -167,6 +194,9 @@ def server2():
         message = ""
         message = PLAYER2.recv(1024).decode("UTF-8")
         print("server2", message)
+        if message == "":
+            print("Connection disconnected...")
+            break
         message = int(message)
         if message > 100:
             M = int2tuple(message - 100)
@@ -202,6 +232,4 @@ def main():
     player1.join()
     player2.join()
     terminate()
-
-
 main()

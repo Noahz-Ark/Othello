@@ -54,14 +54,19 @@ def client():
 
         # first (not my turn)
         elif message == 0:
+            B.color = BLACK
+            B.mycolor = WHITE
             print_board(B.board, B.color, B.mycolor)
             message = str(message)
             CLIENT.send(message.encode("UTF-8"))
 
+        # first (my turn)
         elif message == 1:
+            B.color = BLACK
+            B.mycolor = BLACK
             print_board(B.board, B.color, B.mycolor)
             # TODO: change here
-            mystone = B.decide()
+            mystone = B.random_choice()
             ####################
             B.move(mystone)
             message = str(tuple2int(mystone) + 100)
@@ -87,14 +92,14 @@ def client():
 
             if not the_end(B.board, B.color):
                 # TODO: change here
-                mystone = B.decide()
+                mystone = B.random_choice()
                 ####################
                 B.move(mystone)
                 message = str(tuple2int(mystone) + 100)
                 M = tuple2int(mystone)
                 CLIENT.send(message.encode("UTF-8"))
         # win
-        elif message < 10000:
+        elif message < 20000:
             (_, b, w) = decode_result(message)
             print("Win!\n")
             print("black", b, " vs ", w, "white\n")
@@ -102,7 +107,7 @@ def client():
             CLIENT.close()
             break
         # lose
-        elif message < 20000:
+        elif message < 30000:
             (_, b, w) = decode_result(message)
             print("Lose!\n")
             print("black", b, " vs ", w, "white\n")
@@ -110,7 +115,7 @@ def client():
             CLIENT.close()
             break
         # draw
-        elif message < 30000:
+        elif message < 40000:
             (_, b, w) = decode_result(message)
             print("Draw!\n")
             print(b, " vs ", w, "\n")

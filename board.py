@@ -2,22 +2,48 @@ import random
 import sys
 import re
 
-from variable import * # NONE, WHITE, BLACK, SENTINEL, NONE_STONE, WHITE_STONE, BLACK_STONE, DIRECTIONS, CELLS
-from method import * # int2tuple, tuple2int, decode_result, encode_result
+from variable import *
+from method import *
+# from ai import *
 
 def init_board():
     b = [[(3 if i==0 or i==9 or j==0 or j==9 else 0) for i in range(10)] for j in range(10)]
     b[4][4] = 1; b[4][5] = 2; b[5][4] = 2; b[5][5] = 1
     return b
 
+
 def init_color():
     return BLACK
+    
+
+def init_moves():
+    return []
+
 
 def copy_board(board):
-    return [[board[i][j] for i in range(10)] for j in range(10)]
+    if board is None:
+        return init_board()
+    else:
+        return [[board[i][j] for i in range(10)] for j in range(10)]
+
+
+def copy_color(color):
+    if color is None:
+        return init_color()
+    else:
+        return color
+
+
+def copy_moves(moves):
+    if moves is None:
+        return init_moves()
+    else:
+        return moves
+
 
 def opposite_color(color):
     return 3 - color
+
 
 def count_color(board, color):
     cnt = 0
@@ -137,10 +163,11 @@ def choose_move(moves):
 
 
 class Board:
-    def __init__(self):
-        self.board = copy_board(init_board())
-        self.color = init_color()
-        self.mycolor = init_color()
+    def __init__(self, board=None, color=None, mycolor=None, moves=None):
+        self.board = copy_board(board)
+        self.color = copy_color(color)
+        self.mycolor = copy_color(mycolor)
+        self.moves = copy_moves(moves)
 
     def move(self, stone):
         (j,i) = stone
@@ -152,6 +179,7 @@ class Board:
                 self.board[i][j] = self.color
         ocolor = opposite_color(self.color)
         self.color = valid_color(self.board, ocolor)
+        self.moves.append((i,j))
         
     def random_choice(self):
         moves = valid_moves(self.board, self.color)
