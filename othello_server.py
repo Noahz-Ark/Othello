@@ -33,6 +33,7 @@ PLAYER1 = None
 PLAYER2 = None
 COLOR_OF_PLAYER = {"player1": None, "player2": None}
 PLAYER_OF_COLOR = {"black": None, "player2": None}
+SOCKET_OF_PLAYER = {"player1": None, "player2": None}
 
 REF = None
 PLY1 = None
@@ -41,7 +42,7 @@ PLY2 = None
 START = None
 END = None
 
-MATCH = {"player1": None, "player2": None}
+MATCH = {"player1": None, "player2": None, "none": None}
 TIME = {"player1": None, "player2": None}
 
 
@@ -56,13 +57,15 @@ def server0():
         #TODO: 初期化処理
         START = True
         END = False
-        PLAYER1 = None
-        PLAYER2 = None
+        # PLAYER1 = None
+        # PLAYER2 = None
         # REFEREE = None
         PLY1 = False
         PLY2 = False
         REF = True
         B = Board()
+        TIME["player1"] = TIMELIMIT["player1"]
+        TIME["player2"] = TIMELIMIT["player2"]
         ####
         while (PLAYER1 is None) or (PLAYER2 is None):
             pass
@@ -70,26 +73,21 @@ def server0():
         while True:
             if START:
                 r = random.choice([True, False])
+                PLY1 = True
+                PLY2 = True
+                REF = False
+                START = False
+                SOCKET_OF_PLAYER["player1"] = PLAYER1
+                SOCKET_OF_PLAYER["player2"] = PLAYER2
+                PLAYER_OF_COLOR["black"] = "player1" if r else "player2"
+                PLAYER_OF_COLOR["white"] = "player2" if r else "player1"
+                COLOR_OF_PLAYER["player1"] = "black" if r else "white"
+                COLOR_OF_PLAYER["player2"] = "white" if r else "black"
+
                 if r:
-                    PLY1 = True
-                    PLY2 = True
-                    REF = False
-                    START = False
-                    PLAYER_OF_COLOR["black"] = PLAYER1
-                    PLAYER_OF_COLOR["white"] = PLAYER2
-                    COLOR_OF_PLAYER["player1"] = BLACK
-                    COLOR_OF_PLAYER["player2"] = WHITE
                     PLAYER1.send("1".encode("UTF-8"))
                     PLAYER2.send("0".encode("UTF-8"))
                 else:
-                    PLY1 = True
-                    PLY2 = True
-                    REF = False
-                    START = False
-                    PLAYER_OF_COLOR["black"] = PLAYER2
-                    PLAYER_OF_COLOR["white"] = PLAYER1
-                    COLOR_OF_PLAYER["player2"] = BLACK
-                    COLOR_OF_PLAYER["player1"] = WHITE
                     PLAYER1.send("0".encode("UTF-8"))
                     PLAYER2.send("1".encode("UTF-8"))
                 # end else
@@ -98,29 +96,27 @@ def server0():
                 b, w = (count_color(B.board, BLACK), count_color(B.board, WHITE))
                 if b > w:
                     message = str(encode_result((1, b, w)))
-                    PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
+                    SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message.encode("UTF-8"))
                     message = str(encode_result((2, b, w)))
-                    PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+                    SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message.encode("UTF-8"))
+                    MATCH[PLAYER_OF_COLOR["black"]] += 1
                 elif b < w:
-                    # message = ""
                     message = str(encode_result((2, b, w)))
-                    PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
-                    # message = ""
+                    SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message.encode("UTF-8"))
                     message = str(encode_result((1, b, w)))
-                    PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+                    SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message.encode("UTF-8"))
+                    MATCH[PLAYER_OF_COLOR["white"]] += 1
                 else:
-                    # message = ""
                     message = str(encode_result((3, b, w)))
-                    PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
-                    # message = ""
+                    SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message.encode("UTF-8"))
                     message = str(encode_result((3, b, w)))
-                    PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+                    SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message.encode("UTF-8"))
+                    MATCH[PLAYER_OF_COLOR["none"]] += 1
                 # end else
                 break
             else:
                 if PLY1 or PLY2:
                     continue
-                # end if
                 if is_valid_move(B.board, B.color, M):
                     B.move(M)
                     print_board(B.board, B.color, B.mycolor)
@@ -132,26 +128,26 @@ def server0():
                     else:
                         if B.color == BLACK:
                             message = str(tuple2int(M) + 100)
-                            PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
+                            SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message.encode("UTF-8"))
                             message = str(tuple2int(M))
-                            PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+                            SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message.encode("UTF-8"))
                         # end if
                         if B.color == WHITE:
                             message = str(tuple2int(M))
-                            PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
+                            SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message.encode("UTF-8"))
                             message = str(tuple2int(M) + 100)
-                            PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+                            SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message.encode("UTF-8"))
                         # end if
+                    # end if
                     REF = False
                     PLY1 = True
                     PLY2 = True
-                    # end if
                 else:
                     b, w = (count_color(B.board, BLACK), count_color(B.board, WHITE))
                     message = str(encode_result((0, b, w)))
-                    PLAYER_OF_COLOR["black"].send(message.encode("UTF-8"))
+                    SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message.encode("UTF-8"))
                     message = str(encode_result((1, b, w)))
-                    PLAYER_OF_COLOR["white"].send(message.encode("UTF-8"))
+                    SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message.encode("UTF-8"))
                     break
                 # end if
             # end if
@@ -160,6 +156,10 @@ def server0():
             pass
         #TODO: 終了処理
         print("reached!")
+        match = MATCH["player1"] + MATCH["player2"] + MATCH["none"]
+        if match >= MATCHNUMBER:
+            print("player1 wins %d times, player2 wins %d times (draw %d)." % (MATCH["player1"], MATCH["player2"], MATCH["none"]) )
+            break
         ####
     # end while
 # end def   
@@ -179,16 +179,11 @@ def server1():
         PLAYER1, _ = SERVER.accept()
 
         while PLAYER2 is None:
-            # pass
             print("player2 is None")
             time.sleep(1)
         # end while
         while True:
-            # if END:
-            #     break
             if REF:
-                print("ref is True")
-                time.sleep(1)
                 continue
             # end if
             message = ""
@@ -205,6 +200,10 @@ def server1():
             # end if
             PLY1 = False
         # end while
+        match = MATCH["player1"] + MATCH["player2"] + MATCH["none"]
+        if match >= MATCHNUMBER:
+            break
+        # end if
     # end while
             
 
@@ -218,13 +217,10 @@ def server2():
     while True:
         PLAYER2, _ = SERVER.accept()
         while PLAYER1 is None:
-            # pass
             print("player1 is None")
             time.sleep(1)
         # end if
         while True:
-            # if END:
-            #     break
             if REF:
                 continue
             # end if
@@ -242,6 +238,10 @@ def server2():
             # end if
             PLY2 = False
         # end while
+        match = MATCH["player1"] + MATCH["player2"] + MATCH["none"]
+        if match >= MATCHNUMBER:
+            break
+        # end if
     # end while
 
 
@@ -249,6 +249,7 @@ def initialize():
     global B, C, M
     global START, END
     global REF, PLY1, PLY2
+    global MATCH
     global HOST, PORT, SERVER
 
     B = Board()
@@ -259,6 +260,9 @@ def initialize():
     REF = True
     PLY1 = False
     PLY2 = False
+    MATCH["player1"] = 0
+    MATCH["player2"] = 0
+    MATCH["none"] = 0
     HOST = "localhost"
     PORT = int(sys.argv[1])
     SERVER = socket.socket()

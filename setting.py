@@ -1,5 +1,5 @@
 PLAYERNAME = {"player1": "Anonymous", "player2": "Anonymous"}
-MATCHNUMBER = 1
+MATCHNUMBER = 5
 TIMELIMIT = {"player1": 60000, "player2": 60000}
 HANDICAP = None
 DISPLAY = None
