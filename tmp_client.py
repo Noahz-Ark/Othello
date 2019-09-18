@@ -1,5 +1,6 @@
 import random
 import sys
+import time
 import socket
 
 # macro
@@ -41,142 +42,143 @@ def client():
     global B, C, M
 
     initialize_match()
-    message = ""
-    message = CLIENT.recv(1024).decode("UTF-8")
-    validate_message(message)
+    # 10000000
+    message_r = receive_message()
+    message = read_message(message_r)
+    if message[0] == 10:
+        print("match start")
+    # while True:
+    #     time.sleep(1)
+    #     print(message)
+    #     print(message_r)
 
     while True:
         initialize_game()
 
-        while True:
+        message_r = receive_message()
+        print("init_game: ", message_r)
+        message = read_message(message_r)
 
-
-
-    while True:
-        message = ""
-        message = CLIENT.recv(1024).decode("UTF-8")
-        print("server1", message)
-        if message == "":
-            print("Connection disconnected...")
-        # end if
-        message = int(message)
-
-        if message < 0:
+        # matchend
+        if message[0] == 20:
             break
 
-        # first (not my turn)
-        elif message == 0:
-            B.color = BLACK
-            B.mycolor = WHITE
-            print_board(B.board, B.color, B.mycolor)
-            message = str(message)
-            CLIENT.send(message.encode("UTF-8"))
-
-        # first (my turn)
-        elif message == 1:
+        # gamestart, first
+        elif message[0] == 31:
             B.color = BLACK
             B.mycolor = BLACK
             print_board(B.board, B.color, B.mycolor)
-            # TODO: change here
+            # TODO:
             mystone = B.random_choice()
-            ####################
-            B.move(mystone)
-            message = str(tuple2int(mystone) + 100)
-            M = tuple2int(mystone)
-            CLIENT.send(message.encode("UTF-8"))
-
-        # not first (not my turn)
-        elif message < 100:
-            if M != message:
-                opstone = int2tuple(message)
-                B.move(opstone)
+            ####
+            mystone = tuple2int(mystone)
+            message_s = write_message([55, mystone])
+            print("31 message_s: ", message_s)
+            send_message(message_s)
+        # gamestart, second
+        elif message[0] == 32:
+            B.color = BLACK
+            B.mycolor = WHITE
             print_board(B.board, B.color, B.mycolor)
-            if not the_end(B.board, B.color):
-                message = str(message)
-                CLIENT.send(message.encode("UTF-8"))
+            mystone = 99
+            message_s = write_message([57, mystone])
+            print("32 message_s: ", message_s)
+            send_message(message_s)
 
-        # not first (my turn)
-        elif message < 200:
-            message = message % 100
-            opstone = int2tuple(message)
-            B.move(opstone)
-            print_board(B.board, B.color, B.mycolor)
+        while True:
+            message_r = receive_message()
+            if message_r == "":
+                print("hoge")
+                return
+            message = read_message(message_r)
+            # print("Now playing ... message: ", message)
 
-            if not the_end(B.board, B.color):
-                # TODO: change here
-                mystone = B.random_choice()
-                ####################
+            # gameend
+            if message[0] == 41 or message[0] == 42:
+                (wel, b, w) = (message[1], message[2], message[3])
+                if wel == 1:
+                    print("Win!\n")
+                elif wel == 2:
+                    print("Lose\n")
+                else:
+                    print("Even\n")
+                print("black", b, " vs ", w, "white\n")
+                print_board(B.board, B.color, B.mycolor)
+                break
+            # on going
+            elif message[0] == 51:
+                mystone = int2tuple(message[1])
                 B.move(mystone)
-                message = str(tuple2int(mystone) + 100)
-                M = tuple2int(mystone)
-                CLIENT.send(message.encode("UTF-8"))
-        # win
-        elif message < 20000:
-            (_, b, w) = decode_result(message)
-            print("Win!\n")
-            print("black", b, " vs ", w, "white\n")
-            print_board(B.board, B.color, B.mycolor)
-            CLIENT.close()
-            break
-        # lose
-        elif message < 30000:
-            (_, b, w) = decode_result(message)
-            print("Lose!\n")
-            print("black", b, " vs ", w, "white\n")
-            print_board(B.board, B.color, B.mycolor)
-            CLIENT.close()
-            break
-        # draw
-        elif message < 40000:
-            (_, b, w) = decode_result(message)
-            print("Draw!\n")
-            print(b, " vs ", w, "\n")
-            print_board(B.board, B.color, B.mycolor)
-            CLIENT.close()
-            break
-        else:
-            print("???\n")
-            break
-    CLIENT.close()
+                print_board(B.board, B.color, B.mycolor)
+            elif message[0] == 52:
+                mystone = int2tuple(message[1])
+                B.move(mystone)
+                print_board(B.board, B.color, B.mycolor)
+                message_s = write_message([56, message[1]])
+                send_message(message_s)
+            elif message[0] == 53:
+                opstone = int2tuple(message[1])
+                B.move(opstone)
+                print_board(B.board, B.color, B.mycolor)
+            elif message[0] == 54:
+                opstone = int2tuple(message[1])
+                B.move(opstone)
+                print_board(B.board, B.color, B.mycolor)
+                # TODO:
+                mystone = B.random_choice()
+                ####
+                mystone = tuple2int(mystone)
+                message_s = write_message([55, mystone])
+                send_message(message_s)
+
+        terminate_game()
+
+    terminate_match()
 
 
-def validate_message(m):
+def receive_message():
     global CLIENT
-    if m == "":
-        print("Disconnected...")
-        return
+    message_r = ""
+    message_r = CLIENT.recv(1024).decode("UTF-8")
+
+    if message_r == "":
+        print("disconnected...")
+        return 0
     else:
         try:
-            message = int(m)
-            message_val = message/1000000
-            if message_val == 0:
-                print("error")
-            elif message_val == 10:
-                print("match start")
-            elif message_val == 20:
-                print("match end")
-            elif message_val == 31:
-                print("game start, first")
-            elif message_val == 32:
-                print("game start, second")
-            elif message_val == 41:
-                print("game end(normally)")
-            elif message_val == 42:
-                print("game end(abnormally)")
-            elif message_val == 51:
-                print("next message will be 4********")
-            elif message_val == 52:
-                print("next message will be 5********")
-            elif message_val == 53:
-                print("next message will be 4********")
-            elif message_val == 54:
-                print("next message will be 5********")
-            else:
-                pass
+            message = int(message_r)
+            return message
         except:
-            pass
+            return -1
 
 
+def send_message(message):
+    global CLIENT
+    message_s = message.encode("UTF-8")
+    CLIENT.send(message_s)
+
+
+def read_message(abcdefgh):
+    array = []
+    ab = abcdefgh // 1000000
+    array.append(ab)
+    if ab == 41 or ab == 42:
+        cdefgh = abcdefgh % 1000000
+        c = cdefgh // 100000
+        defgh = cdefgh % 100000
+        de = defgh // 1000
+        fgh = defgh % 1000
+        fg = fgh // 10
+        array.extend([c, de, fg])
+    elif ab == 51 or ab == 52 or ab == 53 or ab == 54:
+        cdefgh = abcdefgh % 1000000
+        cd = cdefgh // 10000
+        array.append(cd)
+    return array
+
+
+def write_message(array):
+    return str(array[0]) + str(array[1]) + "0000"
 
 
 def initialize_match():
