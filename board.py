@@ -11,14 +11,11 @@ def init_board():
     b[4][4] = 1; b[4][5] = 2; b[5][4] = 2; b[5][5] = 1
     return b
 
-
 def init_color():
     return BLACK
-    
 
 def init_moves():
     return []
-
 
 def copy_board(board):
     if board is None:
@@ -26,13 +23,11 @@ def copy_board(board):
     else:
         return [[board[i][j] for i in range(10)] for j in range(10)]
 
-
 def copy_color(color):
     if color is None:
         return init_color()
     else:
         return color
-
 
 def copy_moves(moves):
     if moves is None:
@@ -40,10 +35,8 @@ def copy_moves(moves):
     else:
         return moves
 
-
 def opposite_color(color):
     return 3 - color
-
 
 def count_color(board, color):
     cnt = 0
@@ -116,6 +109,20 @@ def the_start(board):
 def the_end(board, color):
     return valid_color(board, color) == NONE
 
+def board2bit(board, color):
+    intlist = sum(board, [])
+    bitlist = list(map((lambda x: 1 if x==color else 0), intlist))
+    strlist = list(map(str, bitlist))
+    strbit = "".join(strlist)
+    bit = int(strbit)
+    return bit
+
+def bit2board(bit):
+    strbit = str(bit)
+    strlist = list(strbit)
+    bitlist = list(map(int, strlist))
+    board = [bitlist[8*i:8*(i+1)] for i in range(len(bitlist)//2)]
+    return board    
 
 def print_color(color):
     if color == BLACK:
