@@ -40,58 +40,48 @@ def main():
 def client():
     global CLIENT
     global B, C, M
+    global FLAG
 
     initialize_match()
-    # 10000000
     message_r = receive_message()
     message = read_message(message_r)
     if message[0] == 10:
         print("match start")
-    # while True:
-    #     time.sleep(1)
-    #     print(message)
-    #     print(message_r)
 
     while True:
         initialize_game()
 
-        message_r = receive_message()
-        print("init_game: ", message_r)
-        message = read_message(message_r)
-
-        # matchend
-        if message[0] == 20:
-            break
-
-        # gamestart, first
-        elif message[0] == 31:
-            B.color = BLACK
-            B.mycolor = BLACK
-            print_board(B.board, B.color, B.mycolor)
-            # TODO:
-            mystone = B.random_choice()
-            ####
-            mystone = tuple2int(mystone)
-            message_s = write_message([55, mystone])
-            print("31 message_s: ", message_s)
-            send_message(message_s)
-        # gamestart, second
-        elif message[0] == 32:
-            B.color = BLACK
-            B.mycolor = WHITE
-            print_board(B.board, B.color, B.mycolor)
-            mystone = 99
-            message_s = write_message([57, mystone])
-            print("32 message_s: ", message_s)
-            send_message(message_s)
-
         while True:
             message_r = receive_message()
-            if message_r == "":
-                print("hoge")
+            print("message_r: ", message_r)
+            if message_r == 0:
                 return
             message = read_message(message_r)
-            # print("Now playing ... message: ", message)
+
+            # matchend
+            if message[0] == 20:
+                FLAG = True
+                break
+
+            # gamestart, first
+            elif message[0] == 31:
+                B.color = BLACK
+                B.mycolor = BLACK
+                print_board(B.board, B.color, B.mycolor)
+                # TODO:
+                mystone = B.random_choice()
+                ####
+                mystone = tuple2int(mystone)
+                message_s = write_message([55, mystone])
+                send_message(message_s)
+            # gamestart, second
+            elif message[0] == 32:
+                B.color = BLACK
+                B.mycolor = WHITE
+                print_board(B.board, B.color, B.mycolor)
+                mystone = 99
+                message_s = write_message([57, mystone])
+                send_message(message_s)
 
             # gameend
             if message[0] == 41 or message[0] == 42:
@@ -131,6 +121,8 @@ def client():
                 message_s = write_message([55, mystone])
                 send_message(message_s)
 
+        if FLAG:
+            break
         terminate_game()
 
     terminate_match()
@@ -183,6 +175,9 @@ def write_message(array):
 
 def initialize_match():
     global HOST, PORT, CLIENT
+    global FLAG
+
+    FLAG = False
 
     HOST = sys.argv[1]
     PORT = int(sys.argv[2])
@@ -193,6 +188,8 @@ def initialize_match():
 def initialize_game():
     global B, C, M
     global TIME
+
+    print("initialize game!")
 
     TIME = TIMELIMIT
 

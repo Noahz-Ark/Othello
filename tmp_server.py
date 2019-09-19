@@ -67,19 +67,15 @@ def referee_server():
 
     initialize_match(0)
 
-    print("reached!")
     (message1, message2) = ("10000000", "10000000")
     PLAYER1.send(message1.encode("UTF-8"))
     PLAYER2.send(message2.encode("UTF-8"))
-
-    print("reached!!!")
     
     while True:
         initialize_game(0)
 
         while True:
-            # FIXME: REF or *** として特別にrefereeを動かせるようにする(REFの初期値はFalseにすれば良い)
-            if PLY1 or PLY2:
+            if (not(REF) and PLY1) or (not(REF) and PLY2):
                 continue
 
             if GAMESTART:
@@ -88,74 +84,67 @@ def referee_server():
                 SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                 SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                 GAMESTART = False
-                REF = False
+                # REF = False
                 PLY1 = True
                 PLY2 = True
                 # print_board(B.board, B.color, B.mycolor)
             elif GAMEEND:
                 print("GAMEEND")
                 (b, w) = (count_color(B.board, BLACK), count_color(B.board, WHITE))
-                (b, w) = (str(b), str(w))
                 if b > w:
-                    # (message1, message2) = ("411%s%s0"%(b,w), "412%s%s0"%(b,w))
                     message1 = write_message([41, 1, b, w])
                     message2 = write_message([41, 2, b, w])
                     RESULT[PLAYER_OF_COLOR["black"]] += 1
                 elif b < w:
-                    # (message1, message2) = ("412%s%s0"%(b,w), "411%s%s0"%(b,w))
                     message1 = write_message([41, 2, b, w])
                     message2 = write_message([41, 1, b, w])
                     RESULT[PLAYER_OF_COLOR["white"]] += 1
                 else:
-                    # (message1, message2) = ("413%s%s0"%(b,w), "413%s%s0"%(b,w))
                     message1 = write_message([41, 3, b, w])
                     message2 = write_message([41, 3, b, w])
                     RESULT[PLAYER_OF_COLOR["none"]] += 1
                 SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                 SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                 GAMEEND = False
-                REF = False
+                # REF = True
                 PLY1 = True
                 PLY2 = True
                 print_board(B.board, B.color, B.mycolor)
                 break
             else:
                 if is_valid_move(B.board, B.color, M):
+                    C = B.color
                     B.move(M)
                     if the_end(B.board, B.color):
-                        if B.color == BLACK:
-                            m = str(tuple2int(M))
-                            # (message1, message2) = ("51%s0000"%(m), "53%s0000"%(m))
+                        if C == BLACK:
+                            m = tuple2int(M)
                             message1 = write_message([51, m])
                             message2 = write_message([53, m])
                             print(message1, message2)
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
-                        elif B.color == WHITE:
-                            m = str(tuple2int(M))
-                            # (message1, message2) = ("53%s0000"%(m), "51%s0000"%(m))
+                        elif C == WHITE:
+                            m = tuple2int(M)
                             message1 = write_message([53, m])
                             message2 = write_message([51, m])
                             print(message1, message2)
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
-                        elif B.color == NONE:
+                        elif C == NONE:
                             pass
                         GAMEEND = True
-                        print("GAMEEND False -> True!")
-                        # FIXME: このままではserver1/2がrecv待ちになり、PLY1/2がTrueのままになってしまい、すべてが滞る
+                        REF = True
+
                     else:
                         if B.color == BLACK:
-                            m = str(tuple2int(M))
-                            # (message1, message2) = ("52%s0000"%(m), "54%s0000"%(m))
+                            m = tuple2int(M)
                             message1 = write_message([52, m])
                             message2 = write_message([54, m])
                             print(message1, message2)
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                         elif B.color == WHITE:
-                            m = str(tuple2int(M))                            
-                            # (message1, message2) = ("54%s0000"%(m), "52%s0000"%(m))
+                            m = tuple2int(M)
                             message1 = write_message([54, m])
                             message2 = write_message([52, m])
                             print(message1, message2)
@@ -164,21 +153,20 @@ def referee_server():
                         elif B.color == NONE:
                             pass
 
-                    REF = False
+                    # REF = False
                     PLY1 = True
                     PLY2 = True
                     print_board(B.board, B.color, B.mycolor)
                 else:
                     (b, w) = (count_color(B.board, BLACK), count_color(B.board, WHITE))
-                    (b, w) = (str(b), str(w))
                     if B.color == BLACK:
-                        # (message1, message2) = ("421%s%s0"%(b,w), "422%s%s0"%(b,w))
                         message1 = write_message([42, 1, b, w])
                         message2 = write_message([42, 2, b, w])
+                        RESULT[PLAYER_OF_COLOR["black"]] += 1
                     elif B.color == WHITE:
-                        # (message1, message2) = ("422%s%s0"%(b,w), "421%s%s0"%(b,w))
                         message1 = write_message([42, 2, b, w])
                         message2 = write_message([42, 1, b, w])
+                        RESULT[PLAYER_OF_COLOR["white"]] += 1
                     else:
                         pass
                     SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
@@ -189,6 +177,7 @@ def referee_server():
 
         cnt = RESULT["player1"] + RESULT["player2"] + RESULT["none"]
         if cnt >= MATCHNUMBER:
+            MATCHEND = True
             print("player1 wins %d times, player2 wins %d times (draw %d)." % (RESULT["player1"], RESULT["player2"], RESULT["none"]))
             break
 
@@ -210,12 +199,13 @@ def player1_server():
     while True:
         initialize_game(1)
         while True:
-            # FIXME: PLY1のみ判定する
-            if not(PLY1) or REF:
+            if GAMEEND:
+                break
+            if not(PLY1):
                 continue
             message1_r = ""
             message1_r = PLAYER1.recv(1024).decode("UTF-8")
-            print("server1", message1_r)
+            # print("server1", message1_r)
 
             # TODO: 通信をclientから切断されたらどうする？
             # 基本的にはこちらから切りたい
@@ -245,10 +235,68 @@ def player1_server():
                     break
 
             PLY1 = False
+
+        if MATCHEND:
+            break
         
         terminate_game(1)
     
     terminate_match(1)
+
+
+def player2_server():
+    global HOST, PORT, SERVER, SOCKET_OF_PLAYER
+    global REFEREE, PLAYER1, PLAYER2, REF, PLY1, PLY2
+    global COLOR_OF_PLAYER, PLAYER_OF_COLOR
+    global MATCHSTART, MATCHEND, GAMESTART, GAMEEND
+    global R, RESULT, TIME
+    global B, C, M
+
+    initialize_match(2)
+
+    while True:
+        initialize_game(2)
+        while True:
+            if GAMEEND:
+                break
+            if not(PLY2):
+                continue
+            message2_r = ""
+            message2_r = PLAYER2.recv(1024).decode("UTF-8")
+            # print("server2", message2_r)
+
+            if message2_r == "":
+                print("Disconnected...")
+                PLAYER2 = None
+                break
+            else:
+                try:
+                    message2_r = int(message2_r)
+                    message2 = read_message(message2_r)
+                    if message2[0] == 55:
+                        M = int2tuple(message2[1])
+                    elif message2[0] == 56:
+                        pass
+                    elif message2[0] == 57:
+                        pass
+                    else:
+                        raise ValueError
+                except:                    
+                    import traceback
+                    traceback.print_exc()
+                    print("Error occurred!")
+                    SERVER.close()
+                    break
+
+            PLY2 = False
+
+
+        if MATCHEND:
+            break
+
+        terminate_game(2)
+    
+    terminate_match(2)
 
 
 def read_message(abcdefgh):
@@ -269,59 +317,6 @@ def write_message(array):
     return message
 
 
-def player2_server():
-    global HOST, PORT, SERVER, SOCKET_OF_PLAYER
-    global REFEREE, PLAYER1, PLAYER2, REF, PLY1, PLY2
-    global COLOR_OF_PLAYER, PLAYER_OF_COLOR
-    global MATCHSTART, MATCHEND, GAMESTART, GAMEEND
-    global R, RESULT, TIME
-    global B, C, M
-
-    initialize_match(2)
-
-    while True:
-        initialize_game(2)
-        while True:
-            #TODO: 必要？
-            if not(PLY2) or REF:
-                continue
-            message2_r = ""
-            message2_r = PLAYER2.recv(1024).decode("UTF-8")
-            print("server2", message2_r)
-
-            if message2_r == "":
-                print("Disconnected...")
-                PLAYER2 = None
-                break
-            else:
-                try:
-                    message2_r = int(message2_r)
-                    message2 = read_message(message2_r)
-                    if message2[0] == 55:
-                        M = int2tuple(message2[1])
-                    elif message2[0] == 56:
-                        pass
-                    elif message2[0] == 57:
-                        pass
-                    else:
-                        raise ValueError
-
-                except:                    
-                    import traceback
-                    traceback.print_exc()
-
-                    print("Error occurred!")
-                    SERVER.close()
-                    break
-
-            PLY2 = False
-
-        terminate_game(2)
-    
-    terminate_match(2)
-
-
-
 def initialize_match(n):
     global HOST, PORT, SERVER, SOCKET_OF_PLAYER
     global REFEREE, PLAYER1, PLAYER2, REF, PLY1, PLY2
@@ -332,27 +327,16 @@ def initialize_match(n):
 
     # referee
     if n == 0:
-        REFEREE = "referee" # This variable has no meaning
-        (REF, PLY1, PLY2) = (True, False, False)
-        (MATCHSTART, MATCHEND) = (False, False)
-
-        R = random.choice([True, False])
-        PLAYER_OF_COLOR["black"] = "player1" if R else "player2"
-        PLAYER_OF_COLOR["white"] = "player2" if R else "player1"
-        COLOR_OF_PLAYER["player1"] = "black" if R else "white"
-        COLOR_OF_PLAYER["player2"] = "white" if R else "black"
-
-        (RESULT["player1"], RESULT["player2"], RESULT["none"]) = (0, 0, 0)
-
         HOST = "localhost"
         PORT = int(sys.argv[1])
         SERVER = socket.socket()
         SERVER.bind((HOST, PORT))
         SERVER.listen()
 
-        print("reached!")
+        REFEREE = "referee" # This variable has no meaning
+        (RESULT["player1"], RESULT["player2"], RESULT["none"]) = (0, 0, 0)
 
-        MATCHSTART = True
+        (MATCHSTART, MATCHEND) = (True, False)
 
     # player1
     elif n == 1:
@@ -391,6 +375,14 @@ def initialize_game(n):
 
     # referee
     if n == 0:
+        print("initialize game!")
+        R = random.choice([True, False])
+        PLAYER_OF_COLOR["black"] = "player1" if R else "player2"
+        PLAYER_OF_COLOR["white"] = "player2" if R else "player1"
+        COLOR_OF_PLAYER["player1"] = "black" if R else "white"
+        COLOR_OF_PLAYER["player2"] = "white" if R else "black"
+
+        (REF, PLY1, PLY2) = (False, False, False)
         (GAMESTART, GAMEEND) = (True, False)
         (TIME["player1"], TIME["player2"]) = (TIMELIMIT["player1"], TIMELIMIT["player2"])
         B = Board()
@@ -443,19 +435,3 @@ def terminate_game(n):
 
 main()
     
-
-
-
-
-
-
-
-            
-
-
-
-
-
-
-
-
