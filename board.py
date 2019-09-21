@@ -38,6 +38,22 @@ def copy_moves(moves):
 def opposite_color(color):
     return 3 - color
 
+def color2char(color):
+    if color == BLACK:
+        return 'x'
+    elif color == WHITE:
+        return 'o'
+    else:
+        return ' '
+
+def char2color(c):
+    if c == 'x':
+        return BLACK
+    elif c == 'o':
+        return WHITE
+    else:
+        return NONE
+
 def count_color(board, color):
     cnt = 0
     for cell in CELLS:

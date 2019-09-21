@@ -290,7 +290,6 @@ def player2_server():
 
             PLY2 = False
 
-
         if MATCHEND:
             break
 
