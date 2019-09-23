@@ -2,9 +2,25 @@ import random
 import sys
 import re
 
-from othello_variable import *
-from othello_method import *
 # from ai import *
+
+
+# global variables
+
+NONE = 0
+WHITE = 1
+BLACK = 2
+SENTINEL = 3
+
+NONE_STONE = ' '
+WHITE_STONE = 'o'
+BLACK_STONE = 'x'
+
+DIRECTIONS = [(-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,-1), (1,0), (1,1)]
+CELLS = [(i,j) for i in range(1,9) for j in range(1,9)]
+
+
+# global method
 
 def init_board():
     b = [[(3 if i==0 or i==9 or j==0 or j==9 else 0) for i in range(10)] for j in range(10)]
@@ -40,30 +56,36 @@ def opposite_color(color):
 
 def color2char(color):
     if color == BLACK:
-        return 'x'
+        return BLACK_STONE
     elif color == WHITE:
-        return 'o'
+        return WHITE_STONE
     else:
-        return ' '
+        return NONE_STONE
 
 def char2color(c):
-    if c == 'x':
+    if c == BLACK_STONE:
         return BLACK
-    elif c == 'o':
+    elif c == WHITE_STONE:
         return WHITE
     else:
         return NONE
 
-def count_color(board, color):
+def int2tuple(n):
+    (i,j) = (n//10, n%10)
+    return (i,j)
+
+def tuple2int(t):
+    (i,j) = t
+    n = i * 10 + j
+    return n
+
+def count(board, color):
     cnt = 0
     for cell in CELLS:
         (j,i) = cell
         if board[i][j] == color:
             cnt += 1
     return cnt
-
-def count(board):
-    return count_color(board, BLACK) + count_color(board, WHITE)
 
 def flip_line(board, color, stone, direction):
     ocolor = opposite_color(color)
@@ -119,7 +141,7 @@ def valid_color(board, color):
         return NONE
 
 def the_start(board):
-    cnt = count(board)
+    cnt = count(board, BLACK) +count(board, WHITE)
     return cnt in [4,5]
 
 def the_end(board, color):

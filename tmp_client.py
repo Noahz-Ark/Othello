@@ -3,10 +3,6 @@ import sys
 import time
 import socket
 
-# macro / global method
-from othello_variable import *
-from othello_method import *
-
 # configuration
 from othello_configuration import *
 from othello_configuration_editable import *

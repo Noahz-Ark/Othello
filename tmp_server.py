@@ -5,10 +5,6 @@ import sys
 import socket
 import threading
 
-# macro / global method
-from othello_variable import *
-from othello_method import *
-
 # configuration
 from othello_configuration import *
 from othello_configuration_editable import *
@@ -111,14 +107,20 @@ def referee_server():
                 else:
                     message1 = write_message([41, 3, b, w])
                     message2 = write_message([41, 3, b, w])
-                    RESULT[PLAYER_OF_COLOR["none"]] += 1
+                    RESULT["none"] += 1
                 SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                 SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                 GAMEEND = False
                 # REF = True
                 PLY1 = True
                 PLY2 = True
-                print_board(B.board, B.color, B.mycolor)
+                # FIXME:
+                time.sleep(1)
+                write_on_string(B.board, B.color)
+                clear_window()
+                write_on_window()
+                # print_board(B.board, B.color, B.mycolor)
+                
                 break
             else:
                 if is_valid_move(B.board, B.color, M):
@@ -130,13 +132,13 @@ def referee_server():
                         if C == BLACK:
                             message1 = write_message([51, m])
                             message2 = write_message([53, m])
-                            print(message1, message2)
+                            # print(message1, message2)
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                         elif C == WHITE:
                             message1 = write_message([53, m])
                             message2 = write_message([51, m])
-                            print(message1, message2)
+                            # print(message1, message2)
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                         elif C == NONE:
@@ -149,14 +151,14 @@ def referee_server():
                             m = tuple2int(M)
                             message1 = write_message([52, m])
                             message2 = write_message([54, m])
-                            print(message1, message2)
+                            # print(message1, message2)
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                         elif B.color == WHITE:
                             m = tuple2int(M)
                             message1 = write_message([54, m])
                             message2 = write_message([52, m])
-                            print(message1, message2)
+                            # print(message1, message2)
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                         elif B.color == NONE:
@@ -165,7 +167,13 @@ def referee_server():
                     # REF = False
                     PLY1 = True
                     PLY2 = True
-                    print_board(B.board, B.color, B.mycolor)
+
+                    # FIXME:
+                    time.sleep(1)
+                    write_on_string(B.board, B.color)
+                    clear_window()
+                    write_on_window()
+                    # print_board(B.board, B.color, B.mycolor)
                 else:
                     (b, w) = (count_color(B.board, BLACK), count_color(B.board, WHITE))
                     if B.color == BLACK:
@@ -187,7 +195,7 @@ def referee_server():
         cnt = RESULT["player1"] + RESULT["player2"] + RESULT["none"]
         if cnt >= MATCHNUMBER:
             MATCHEND = True
-            print("player1 wins %d times, player2 wins %d times (draw %d)." % (RESULT["player1"], RESULT["player2"], RESULT["none"]))
+            # print("player1 wins %d times, player2 wins %d times (draw %d)." % (RESULT["player1"], RESULT["player2"], RESULT["none"]))
             break
 
     (message1, message2) = ("20000000", "20000000")
@@ -220,7 +228,7 @@ def player1_server():
             # TODO: 通信をclientから切断されたらどうする？
             # 基本的にはこちらから切りたい
             if message1_r == "":
-                print("Disconnected...")
+                # print("Disconnected...")
                 PLAYER1 = None
                 break
             else:
@@ -345,13 +353,17 @@ def initialize_match(n):
         REFEREE = "referee" # This variable has no meaning
         (RESULT["player1"], RESULT["player2"], RESULT["none"]) = (0, 0, 0)
 
+        # FIXME:
+        initialize_window()
+
         (MATCHSTART, MATCHEND) = (True, False)
 
     # player1
     elif n == 1:
         while not MATCHSTART:
-            time.sleep(1)
-            print("SERVER is None")
+            pass
+            # time.sleep(1)
+            # print("SERVER is None")
         PLAYER1, _ = SERVER.accept()
         SOCKET_OF_PLAYER["player1"] = PLAYER1
 
@@ -365,13 +377,14 @@ def initialize_match(n):
         print("PLAYER2 is here")
 
     while (REFEREE is None) or (PLAYER1 is None) or (PLAYER2 is None):
-        time.sleep(1)
-        if REFEREE is None:
-            print("REFEREE is None")
-        if PLAYER1 is None:
-            print("PLAYER1 is None")
-        if PLAYER2 is None:
-            print("PLAYER2 is None")
+        pass
+        # time.sleep(1)
+        # if REFEREE is None:
+        #     print("REFEREE is None")
+        # if PLAYER1 is None:
+        #     print("PLAYER1 is None")
+        # if PLAYER2 is None:
+        #     print("PLAYER2 is None")
 
 
 def initialize_game(n):
@@ -385,7 +398,6 @@ def initialize_game(n):
 
     # referee
     if n == 0:
-        print("initialize game!")
         R = random.choice([True, False])
         PLAYER_OF_COLOR["black"] = "player1" if R else "player2"
         PLAYER_OF_COLOR["white"] = "player2" if R else "player1"
@@ -418,7 +430,8 @@ def terminate_match(n):
 
     # referee
     if n == 0:
-        pass
+        # FIXME:
+        terminate_window()
     # player1
     elif n == 1:
         pass
