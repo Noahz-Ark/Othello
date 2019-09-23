@@ -1,6 +1,4 @@
-# Just workspace of board
-
-from board import Board, valid_moves, the_end
+from othello_board import *
 
 
 # FIXME: minmaxになるように符号を考える

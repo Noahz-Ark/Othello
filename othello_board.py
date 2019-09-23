@@ -2,7 +2,7 @@ import random
 import sys
 import re
 
-from variable import *
+from othello_variable import *
 from method import *
 # from ai import *
 

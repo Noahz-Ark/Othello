@@ -1,5 +1,4 @@
-# general purpose
-
+# board
 NONE = 0
 WHITE = 1
 BLACK = 2
@@ -12,5 +11,9 @@ BLACK_STONE = 'x'
 DIRECTIONS = [(-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,-1), (1,0), (1,1)]
 CELLS = [(i,j) for i in range(1,9) for j in range(1,9)]
 
-# protocol
+# window
+NAMESPACE = 10
+COLORSPACE = 3
+BARSPACE = 4
+WIDTH = (NAMESPACE + COLORSPACE) * 2 + BARSPACE
 

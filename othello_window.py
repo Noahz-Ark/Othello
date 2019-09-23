@@ -1,15 +1,11 @@
 import time
 import curses
 
-from variable import *
-from board import *
+from othello_variable import *
+from othello_board import *
 
 WINDOW = None
 STRING = None
-NAMESPACE = 10
-COLORSPACE = 3
-BARSPACE = 4
-WIDTH = (NAMESPACE + COLORSPACE) * 2 + BARSPACE
 
 # 
 #    Player1  x -- o  Player2
@@ -81,7 +77,6 @@ def write_on_string():
     board = init_board()
     color = init_color()
     STRING = make("Player1", "Player2", BLACK, WHITE, board, color)
-    # print(STRING)
 
 
 def write_on_window():
@@ -109,26 +104,25 @@ def terminate_window():
     STRING = ""
 
 
-def othello_window(window):
-    window.addstr("hoge")
-    window.refresh()
-    time.sleep(1)
-    window.erase()
-    window.refresh()
-    time.sleep(1)
+# def othello_window(window):
+#     window.addstr("hoge")
+#     window.refresh()
+#     time.sleep(1)
+#     window.erase()
+#     window.refresh()
+#     time.sleep(1)
 
-def main():
-    global WINDOW
-    global STRING
-    # curses.wrapper(othello_window)
-    # print(write_on_string())
-    initialize_window()
-    write_on_string()
-    write_on_window()
-    time.sleep(3)
-    clear_window()
-    time.sleep(1)
-    terminate_window()
+# def main():
+#     global WINDOW
+#     global STRING
+#     # curses.wrapper(othello_window)
+#     initialize_window()
+#     write_on_string()
+#     write_on_window()
+#     time.sleep(3)
+#     clear_window()
+#     time.sleep(1)
+#     terminate_window()
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

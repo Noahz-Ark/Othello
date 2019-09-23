@@ -3,34 +3,34 @@ import sys
 import time
 import socket
 
-# macro
-from variable import *
-from method import *
-from setting import *
+# macro / global method
+from othello_variable import *
+from othello_method import *
 
-# global method
-from board import is_valid_move, valid_moves, count_color, the_end, print_board
+# configuration
+from othello_configuration import *
+from othello_configuration_editable import *
+
+# window
+from othello_window import *
 
 # class
-from board import Board
+from othello_board import *
+
+# algorithm
+from othello_ai import *
+from othello_ai_editable import *
 
 # global variable
-B = None
-C = None
-M = None
-
 HOST = None
 PORT = None
 CLIENT = None
 
-REFEREE = None
-PLAYER1 = None
-PLAYER2 = None
-REF = None
-PLY1 = None
-PLY2 = None
+ALGORITHM = None
 
+BOARD = None
 TIME = None
+FLAG = None
 
 
 def main():
@@ -39,7 +39,7 @@ def main():
 
 def client():
     global CLIENT
-    global B, C, M
+    global BOARD
     global FLAG
 
     initialize_match()
@@ -62,27 +62,25 @@ def client():
             if message[0] == 20:
                 FLAG = True
                 break
-
             # gamestart, first
             elif message[0] == 31:
-                B.color = BLACK
-                B.mycolor = BLACK
-                print_board(B.board, B.color, B.mycolor)
+                BOARD.color = BLACK
+                BOARD.mycolor = BLACK
+                print_board(BOARD.board, BOARD.color, BOARD.mycolor)
                 # TODO:
-                mystone = B.random_choice()
+                mystone = BOARD.random_choice()
                 ####
                 mystone = tuple2int(mystone)
                 message_s = write_message([55, mystone])
                 send_message(message_s)
             # gamestart, second
             elif message[0] == 32:
-                B.color = BLACK
-                B.mycolor = WHITE
-                print_board(B.board, B.color, B.mycolor)
+                BOARD.color = BLACK
+                BOARD.mycolor = WHITE
+                print_board(BOARD.board, BOARD.color, BOARD.mycolor)
                 mystone = 99
                 message_s = write_message([57, mystone])
                 send_message(message_s)
-
             # gameend
             if message[0] == 41 or message[0] == 42:
                 (wel, b, w) = (message[1], message[2], message[3])
@@ -93,29 +91,29 @@ def client():
                 else:
                     print("Even\n")
                 print("black", b, " vs ", w, "white\n")
-                print_board(B.board, B.color, B.mycolor)
+                print_board(BOARD.board, BOARD.color, BOARD.mycolor)
                 break
             # on going
             elif message[0] == 51:
                 mystone = int2tuple(message[1])
-                B.move(mystone)
-                print_board(B.board, B.color, B.mycolor)
+                BOARD.move(mystone)
+                print_board(BOARD.board, BOARD.color, BOARD.mycolor)
             elif message[0] == 52:
                 mystone = int2tuple(message[1])
-                B.move(mystone)
-                print_board(B.board, B.color, B.mycolor)
+                BOARD.move(mystone)
+                print_board(BOARD.board, BOARD.color, BOARD.mycolor)
                 message_s = write_message([56, message[1]])
                 send_message(message_s)
             elif message[0] == 53:
                 opstone = int2tuple(message[1])
-                B.move(opstone)
-                print_board(B.board, B.color, B.mycolor)
+                BOARD.move(opstone)
+                print_board(BOARD.board, BOARD.color, BOARD.mycolor)
             elif message[0] == 54:
                 opstone = int2tuple(message[1])
-                B.move(opstone)
-                print_board(B.board, B.color, B.mycolor)
+                BOARD.move(opstone)
+                print_board(BOARD.board, BOARD.color, BOARD.mycolor)
                 # TODO:
-                mystone = B.random_choice()
+                mystone = BOARD.random_choice()
                 ####
                 mystone = tuple2int(mystone)
                 message_s = write_message([55, mystone])
@@ -170,7 +168,10 @@ def read_message(abcdefgh):
 
 
 def write_message(array):
-    return str(array[0]) + str(array[1]) + "0000"
+    message = str(array[0])
+    if array[0] == 55 or array[0] == 56 or array[0] == 57:
+        message += str(array[1]) + "0000"
+    return message
 
 
 def initialize_match():
@@ -178,7 +179,6 @@ def initialize_match():
     global FLAG
 
     FLAG = False
-
     HOST = sys.argv[1]
     PORT = int(sys.argv[2])
     CLIENT = socket.socket()
@@ -186,16 +186,10 @@ def initialize_match():
 
 
 def initialize_game():
-    global B, C, M
+    global BOARD
     global TIME
-
-    print("initialize game!")
-
     TIME = TIMELIMIT
-
-    B = Board()
-    C = B.color
-    M = 0
+    BOARD = Board()
 
 
 def terminate_match():
@@ -205,4 +199,6 @@ def terminate_match():
 def terminate_game():
     pass
 
-main()
+
+if __name__ == "__main__":
+    main()

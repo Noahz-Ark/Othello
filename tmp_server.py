@@ -5,16 +5,23 @@ import sys
 import socket
 import threading
 
-# macro
-from variable import *
-from method import *
-from setting import *
+# macro / global method
+from othello_variable import *
+from othello_method import *
 
-# global method
-from board import is_valid_move, valid_moves, count_color, the_end, print_board
+# configuration
+from othello_configuration import *
+from othello_configuration_editable import *
+
+# window
+from othello_window import *
 
 # class
-from board import Board
+from othello_board import *
+
+# algorithm
+from othello_ai import *
+from othello_ai_editable import *
 
 # global variable
 HOST = None
@@ -39,6 +46,7 @@ GAMEEND = None
 
 R = None
 RESULT = {"player1": None, "player2": None, "none": None}
+HISTORY = None
 TIME = {"player1": None, "player2": None}
 
 B = None
@@ -62,7 +70,8 @@ def referee_server():
     global REFEREE, PLAYER1, PLAYER2, REF, PLY1, PLY2
     global COLOR_OF_PLAYER, PLAYER_OF_COLOR
     global MATCHSTART, MATCHEND, GAMESTART, GAMEEND
-    global R, RESULT, TIME
+    global R
+    global HISTORY, TIME, RESULT
     global B, C, M
 
     initialize_match(0)
@@ -115,16 +124,18 @@ def referee_server():
                 if is_valid_move(B.board, B.color, M):
                     C = B.color
                     B.move(M)
+                    m = tuple2int(M)
+                    HISTORY.append(m)
                     if the_end(B.board, B.color):
                         if C == BLACK:
-                            m = tuple2int(M)
+                            # m = tuple2int(M)
                             message1 = write_message([51, m])
                             message2 = write_message([53, m])
                             print(message1, message2)
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                         elif C == WHITE:
-                            m = tuple2int(M)
+                            # m = tuple2int(M)
                             message1 = write_message([53, m])
                             message2 = write_message([51, m])
                             print(message1, message2)
@@ -191,7 +202,8 @@ def player1_server():
     global REFEREE, PLAYER1, PLAYER2, REF, PLY1, PLY2
     global COLOR_OF_PLAYER, PLAYER_OF_COLOR
     global MATCHSTART, MATCHEND, GAMESTART, GAMEEND
-    global R, RESULT, TIME
+    global R
+    global HISTORY, TIME, RESULT
     global B, C, M
 
     initialize_match(1)
@@ -432,5 +444,6 @@ def terminate_game(n):
     elif n == 2:
         pass
 
-main()
+if __name__ == "__main__":
+    main()
     

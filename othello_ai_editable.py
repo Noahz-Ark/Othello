@@ -1,0 +1,1 @@
+from othello_board import *
