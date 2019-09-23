@@ -128,14 +128,12 @@ def referee_server():
                     HISTORY.append(m)
                     if the_end(B.board, B.color):
                         if C == BLACK:
-                            # m = tuple2int(M)
                             message1 = write_message([51, m])
                             message2 = write_message([53, m])
                             print(message1, message2)
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["black"]].send(message1.encode("UTF-8"))
                             SOCKET_OF_PLAYER[PLAYER_OF_COLOR["white"]].send(message2.encode("UTF-8"))
                         elif C == WHITE:
-                            # m = tuple2int(M)
                             message1 = write_message([53, m])
                             message2 = write_message([51, m])
                             print(message1, message2)
@@ -381,7 +379,8 @@ def initialize_game(n):
     global REFEREE, PLAYER1, PLAYER2, REF, PLY1, PLY2
     global COLOR_OF_PLAYER, PLAYER_OF_COLOR
     global MATCHSTART, MATCHEND, GAMESTART, GAMEEND
-    global R, RESULT, TIME
+    global R
+    global HISTORY, TIME, RESULT
     global B, C, M
 
     # referee
@@ -395,6 +394,7 @@ def initialize_game(n):
 
         (REF, PLY1, PLY2) = (False, False, False)
         (GAMESTART, GAMEEND) = (True, False)
+        HISTORY = []
         (TIME["player1"], TIME["player2"]) = (TIMELIMIT["player1"], TIMELIMIT["player2"])
         B = Board()
         C = B.color
@@ -412,7 +412,8 @@ def terminate_match(n):
     global REFEREE, PLAYER1, PLAYER2, REF, PLY1, PLY2
     global COLOR_OF_PLAYER, PLAYER_OF_COLOR
     global MATCHSTART, MATCHEND, GAMESTART, GAMEEND
-    global R, RESULT, TIME
+    global R
+    global HISTORY, TIME, RESULT
     global B, C, M
 
     # referee
@@ -431,7 +432,8 @@ def terminate_game(n):
     global REFEREE, PLAYER1, PLAYER2, REF, PLY1, PLY2
     global COLOR_OF_PLAYER, PLAYER_OF_COLOR
     global MATCHSTART, MATCHEND, GAMESTART, GAMEEND
-    global R, RESULT, TIME
+    global R
+    global HISTORY, TIME, RESULT
     global B, C, M
 
     # referee

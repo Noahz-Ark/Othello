@@ -2,7 +2,7 @@
 from othello_configuration_editable import *
 
 PLAYERNAME = {"player1": "player1", "player2": "player2"}
-MACHNUMBER = 3
+MATCHNUMBER = 3
 TIMELIMIT = {"player1": 60000, "player2": 60000}
 DISPLAY = ""
 HANDICAP = {"player1": "", "player2": ""}

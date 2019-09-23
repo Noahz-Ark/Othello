@@ -26,8 +26,6 @@ HOST = None
 PORT = None
 CLIENT = None
 
-ALGORITHM = None
-
 BOARD = None
 TIME = None
 FLAG = None
@@ -67,9 +65,8 @@ def client():
                 BOARD.color = BLACK
                 BOARD.mycolor = BLACK
                 print_board(BOARD.board, BOARD.color, BOARD.mycolor)
-                # TODO:
-                mystone = BOARD.random_choice()
-                ####
+                
+                mystone = AI(BOARD)
                 mystone = tuple2int(mystone)
                 message_s = write_message([55, mystone])
                 send_message(message_s)
@@ -112,9 +109,8 @@ def client():
                 opstone = int2tuple(message[1])
                 BOARD.move(opstone)
                 print_board(BOARD.board, BOARD.color, BOARD.mycolor)
-                # TODO:
-                mystone = BOARD.random_choice()
-                ####
+
+                mystone = AI(BOARD)
                 mystone = tuple2int(mystone)
                 message_s = write_message([55, mystone])
                 send_message(message_s)

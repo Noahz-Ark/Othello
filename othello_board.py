@@ -3,7 +3,7 @@ import sys
 import re
 
 from othello_variable import *
-from method import *
+from othello_method import *
 # from ai import *
 
 def init_board():
@@ -174,17 +174,8 @@ def print_board(board, color, mycolor):
         print()
 
 
-def choose_move(moves):
-    l = len(moves)
-    while True:
-        i = input()
-        j = re.sub(r'\d+', '', i)
-        if len(j) == 0:
-            k = int(i) - 1
-            if k in range(l):
-                return moves[k]
-
-
+# FIXME: 手を選択する関数は手を選択するだけにする、手を動かすのはその後で
+# Boardインスタンスを引数とし、次の手を返り値とする関数がいい
 class Board:
     def __init__(self, board=None, color=None, mycolor=None, moves=None):
         self.board = copy_board(board)
@@ -204,17 +195,16 @@ class Board:
         self.color = valid_color(self.board, ocolor)
         self.moves.append((i,j))
         
-    def random_choice(self):
-        moves = valid_moves(self.board, self.color)
-        return random.choice(moves)
+    # def random_choice(self):
+    #     moves = valid_moves(self.board, self.color)
+    #     return random.choice(moves)
 
-    def person_choice(self):
-        moves = valid_moves(self.board, self.color)
-        print_moves(moves)
-        move = choose_move(moves)
-        return move
+    # def person_choice(self):
+    #     moves = valid_moves(self.board, self.color)
+    #     print_moves(moves)
+    #     move = choose_move(moves)
+    #     return move
 
-
-    def decide(self):
-        # return self.random_choice()
-        return self.person_choice()
+    # def decide(self):
+    #     return self.random_choice()
+    #     return self.person_choice()
